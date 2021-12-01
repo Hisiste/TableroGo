@@ -1,0 +1,165 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.9in]{geometry}
+\usepackage[spanish]{babel} 
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{xcolor}
+
+\usepackage{tikz}
+\usepackage{tikz-uml}
+
+\usepackage{hyperref}
+\usepackage{atbegshi,picture}
+\AtBeginShipout{\AtBeginShipoutUpperLeft{%
+  %\put(\dimexpr\paperwidth-1cm\relax,-1.5cm){\makebox[0pt][r]{Copyright DTV}}%
+  \put(\dimexpr1.5cm\relax,-2cm){\makebox[0pt][l]{\shortstack[l]{Programaci\'on Orientada a Objetos y Eventos \\ Enero - Junio 2021 \\ Dr. Luis Carlos Padierna Garc\'ia}}}
+}}
+
+\usepackage{multicol}
+\usepackage{enumitem}
+\setlist{  
+	listparindent=\parindent,
+	parsep=0pt,
+}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+
+\newcommand{\abs}[1]{\left| #1 \right|}
+
+%\makeatletter
+%\newcommand\re{\mathop{\operator@font Re}\nolimits}
+%\newcommand\im{\mathop{\operator@font Im}\nolimits}
+%\newcommand\grad{\mathop{\operator@font grad}\nolimits}
+%\newcommand\Fr{\mathop{\operator@font Fr}\nolimits}
+%\makeatother
+
+\newcommand{\contradiction}{\Rightarrow\!\Leftarrow}
+
+\theoremstyle{definition}
+\newtheorem*{solution}{Solución}
+\newtheorem{definition}{Definición}
+\newtheorem{theorem}{Teorema}
+\newtheorem{proposition}{Proposición}
+\newtheorem*{notation}{Notación}
+
+\title{Programando el juego Go}
+\author{Oliva Ramírez Adrián Fernando \\ NUA: 424647 \\ \href{mailto:af.olivaramirez@ugto.mx}{af.olivaramirez@ugto.mx}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducci\'on}
+
+El juego de mesa llamado Go, es el juego m\'as antiguo del que se tiene conocimiento. Es un juego de estrategia de dos jugadores y el objetivo es conquistar y controlar m\'as \'area del tablero que el contrincante. Las reglas del juego son sencillas de entender, pero es dif\'icil jugar bien.
+
+En este proyecto programar\'e el juego de Go, y tal vez implemente un modo ``en l\'inea'' para jugar con otras personas en el internet.
+
+\section{Objetivo}
+
+Usar \verb|pygame| con gr\'aficos para programar un tablero de Go jugable. Tambi\'en investigar maneras para que se pueda jugar con otras personas en el internet.
+
+\section{Justificaci\'on}
+
+El juego de Go tiene pocas reglas y es sencillo de entender. El problema es que existen detalles, como calcular el puntaje final, que no son sencillos de programar. Incluso apenas en 2015 es que la primera m\'aquina, \textit{AlphaGo}, logr\'o vencer a un jugador profesional. Se necesit\'o de inteligencia artificial para poder programar a \textit{AlphaGo}.
+
+Quiero tener un acercamiento al juego y poder entenderlo lo suficiente como para poder programarlo. Aparte si tengo el tiempo suficiente para poder programar el modo ``en l\'inea'', entender\'e de mejor manera el env\'io y recibo de paquetes.
+
+\section{Diagrama de Clases}
+
+Para facilitar el trabajo, usaremos una clase \verb|Cluster| para guardar los grupos de las fichas. Aquella clase podr\'a actualizar dichos grupos y llevar registro de las ``libertades''. Cuando un grupo de fichas se queda sin libertades, el grupo entero es capturado.
+
+Por otra parte, tendremos la clase del \verb|Tablero Go|. Aquel guardar\'a el tablero entero, los clusters del tablero y se encargar\'a de que todas las reglas de Go sean aplicadas en cada movimiento. Heredaremos las clases \verb|Tablero 19|, \verb|Tablero 13| y \verb|Tablero 9|, donde el n\'umero indica el tama\~no del tablero. Esto para poder adaptar la funci\'on \verb|dibujarTablero()| para cada tablero.
+
+Tenemos el siguiente diagrama:
+
+\begin{tikzpicture} 
+\umlclass{Cluster}{
+    + color : bool \\
+    -- fichasDelCluster : set[tuple[int]] \\
+    -- puntosDeLibertad : set[tuple[int]]
+    }{
+    + Cluster(x : int, y : int) \\
+    + actualizarCluster() : void \\
+    + numLibertades() : int \\
+    + fichaEnLibertad(x : int, y : int) : bool \\
+    + enemigoVecinos() : list[Cluster] \\
+    + calcPerimetro() : list[tuple[int]]
+}
+
+\umlclass[x=9]{Tablero Go}{ 
+    \# tamano : int \\
+    \# tablero : matrix[int] \\
+    \# tablero1Antes : matrix[int] \\
+    \# tablero2Antes : matrix[int] \\
+    \# listaClusters : list[Cluster] \\
+    \# clustTablero : matrix[int]
+    }{ 
+    + Tablero\_Go() \\
+    + esEspacioValido(x : int, y : int) : bool \\
+    + ponerFicha(x : int, y : int) : void \\
+    + calcularPuntaje() : tuple[int] \\
+    \umlvirt{+ dibujarTablero() : void}
+}
+
+\umldep[geometry=--]{Cluster}{Tablero Go}
+
+\umlclass[y=-6]{Tablero 19}{
+
+    }{
+    + Tablero\_19() \\
+    + dibujarTablero() : void
+}
+\umlinherit[geometry=|-|]{Tablero 19}{Tablero Go}
+
+\umlclass[x=5, y=-6]{Tablero 13}{
+
+    }{
+    + Tablero\_13() \\
+    + dibujarTablero() : void
+}
+\umlinherit[geometry=|-|]{Tablero 13}{Tablero Go}
+
+\umlclass[x=10, y=-6]{Tablero 9}{
+
+    }{
+    + Tablero\_9() \\
+    + dibujarTablero() : void
+}
+\umlinherit[geometry=|-|]{Tablero 9}{Tablero Go}
+\end{tikzpicture}
+
+\section{Actividades de Programaci\'on}
+
+\begin{itemize}
+    \item Renderizar im\'agenes y usar el mouse como m\'etodo de entrada usando \verb|pygame|.
+
+    \item Programar un tablero de Go jugable con todas las reglas b\'asicas, sin la funci\'on de calcular el puntaje.
+
+    \item Dibujar de manera correcta el tablero de Go y usar el mouse para poner fichas.
+
+    \item Implementar un sistema para calcular el puntaje de los dos jugadores y declarar un ganador. \cite{scoreGo}
+
+    \item (Opcional) Investigar sobre el env\'io y recibo de sockets por el internet. \cite{multijugador}
+
+    \item (Opcional) Implementar el modo ``en l\'inea'' al juego.
+\end{itemize}
+
+\begin{thebibliography}{9}
+    \bibitem{scoreGo}
+    Andrea Carta (2018) \emph{A static method for computing the score of a Go game}, \href{http://www.micini.net/}{http://www.micini.net/}. Visitado el 2021-11-29 en \href{https://www.oipaz.net/Carta.pdf}{https://www.oipaz.net/Carta.pdf}.
+
+    \bibitem{multijugador}
+    Tim Ruscica (2019) \emph{Python Online Multiplayer Game Development Tutorial}, \href{https://www.freecodecamp.org/}{www.freecodecamp.org}. Visitado el 2021-11-29 en \href{https://www.youtube.com/watch?v=McoDjOCb2Zo}{https://www.youtube.com/watch?v=McoDjOCb2Zo}.
+\end{thebibliography}
+
+\end{document}

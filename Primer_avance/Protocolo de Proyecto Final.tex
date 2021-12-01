@@ -1,0 +1,68 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.9in]{geometry}
+\usepackage[spanish]{babel} 
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{xcolor}
+
+\usepackage{hyperref}
+\usepackage{atbegshi,picture}
+\AtBeginShipout{\AtBeginShipoutUpperLeft{%
+  %\put(\dimexpr\paperwidth-1cm\relax,-1.5cm){\makebox[0pt][r]{Copyright DTV}}%
+  \put(\dimexpr1.5cm\relax,-2cm){\makebox[0pt][l]{\shortstack[l]{Programaci\'on Orientada a Objetos y Eventos \\ Enero - Junio 2021 \\ Dr. Luis Carlos Padierna Garc\'ia}}}
+}}
+
+\usepackage{multicol}
+\usepackage{enumitem}
+\setlist{  
+	listparindent=\parindent,
+	parsep=0pt,
+}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+
+\newcommand{\abs}[1]{\left| #1 \right|}
+
+%\makeatletter
+%\newcommand\re{\mathop{\operator@font Re}\nolimits}
+%\newcommand\im{\mathop{\operator@font Im}\nolimits}
+%\newcommand\grad{\mathop{\operator@font grad}\nolimits}
+%\newcommand\Fr{\mathop{\operator@font Fr}\nolimits}
+%\makeatother
+
+\newcommand{\contradiction}{\Rightarrow\!\Leftarrow}
+
+\theoremstyle{definition}
+\newtheorem*{solution}{Solución}
+\newtheorem{definition}{Definición}
+\newtheorem{theorem}{Teorema}
+\newtheorem{proposition}{Proposición}
+\newtheorem*{notation}{Notación}
+
+\title{Programando el juego Go}
+\author{Oliva Ramírez Adrián Fernando \\ NUA: 424647 \\ \href{mailto:af.olivaramirez@ugto.mx}{af.olivaramirez@ugto.mx}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducci\'on}
+
+El juego de mesa llamado Go, es el juego m\'as antiguo del que se tiene conocimiento. Es un juego de estrategia de dos jugadores y el objetivo es conquistar y controlar m\'as \'area del tablero que el contrincante. Las reglas del juego son sencillas de entender, pero es dif\'icil jugar bien.
+
+En este proyecto programar\'e el juego de Go, y tal vez implemente un modo ``en l\'inea'' para jugar con otras personas en el internet.
+
+\section{Objetivo}
+
+Usar tkinter con gr\'aficos para programar un tablero de Go jugable. Tambi\'en investigar maneras para que se pueda jugar con otras personas en el internet.
+
+\end{document}
