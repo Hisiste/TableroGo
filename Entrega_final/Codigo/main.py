@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame
 from pygame.locals import *
 from sys import exit
 
@@ -12,7 +12,7 @@ font = pygame.font.SysFont(None, 40)
 click = False
 quit_ = False
 
-# Función para colocar tecto en pantalla
+# Función para colocar texto en pantalla
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
     textrect = textobj.get_rect()
@@ -21,29 +21,31 @@ def draw_text(text, font, color, surface, x, y):
     
 def main_menu():
     click = False
+
+    # Colocación de botones al menú
+    bot_Iniciar = pygame.Rect(400, 400, 200, 100)
+    bot_Instr   = pygame.Rect(400, 550, 200, 100)
+    bot_Quit    = pygame.Rect(400, 700, 200, 100)
+
+    mesa_fondo = pygame.image.load('Entrega_final/Fondo.png')
+    mesa_fondo = pygame.transform.scale(mesa_fondo, (1000,1000))
+    # Creamos los objetos y dentro del `while` solamente los dibujamos :3.
+
     while True:
-        
-        mesa_fondo = pygame.image.load('Entrega_final/Fondo.png')
-        mesa_fondo = pygame.transform.scale(mesa_fondo, (1000,1000))
         screen.blit(mesa_fondo,(0,0))
                 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
         
-        # Colocación de botones al menú
-        bot_Iniciar = pygame.Rect(400, 400, 200, 100)
-        bot_Instr = pygame.Rect(400, 550, 200, 100)
-        bot_Quit = pygame.Rect(400, 700, 200, 100)
-        if bot_Iniciar.collidepoint((mx, my)):
-            if click:
+        if click:
+            if bot_Iniciar.collidepoint((mx, my)):
                 game()
-        if bot_Instr.collidepoint((mx, my)):
-            if click:
+            if bot_Instr.collidepoint((mx, my)):
                 instr()
-        if bot_Quit.collidepoint((mx, my)):
-            if click:
+            if bot_Quit.collidepoint((mx, my)):
                 pygame.quit()
-                sys.exit()
+                exit()
+
         pygame.draw.rect(screen, (255, 255, 255), bot_Iniciar)
         draw_text('Iniciar', font, (0, 0, 0), screen, 455, 440)
         pygame.draw.rect(screen, (255, 255, 255), bot_Instr)
@@ -56,11 +58,11 @@ def main_menu():
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit()
+                exit()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.quit()
-                    sys.exit
+                    exit()
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
@@ -78,21 +80,20 @@ def game():
         mx, my = pygame.mouse.get_pos()
         
         # Botones de selección de tablero
-        bot_x9 = pygame.Rect(300, 400, 100, 100)
+        bot_x9  = pygame.Rect(300, 400, 100, 100)
         bot_x13 = pygame.Rect(450, 400, 100, 100)
         bot_x19 = pygame.Rect(600, 400, 100, 100)
-        if bot_x9.collidepoint((mx, my)):
-            if click:
+        if click:
+            if bot_x9.collidepoint((mx, my)):
                 tablero = 9
                 partida(tablero)
-        if bot_x13.collidepoint((mx, my)):
-            if click:
+            elif bot_x13.collidepoint((mx, my)):
                 tablero = 13
                 partida(tablero)
-        if bot_x19.collidepoint((mx, my)):
-            if click:
+            elif bot_x19.collidepoint((mx, my)):
                 tablero = 19
                 partida(tablero)
+
                 
         pygame.draw.rect(screen, (255, 255, 255), bot_x9)
         draw_text('9x9', font, (0, 0, 0), screen, 325, 435)
@@ -106,7 +107,7 @@ def game():
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit()
+                exit()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     running = False
@@ -126,7 +127,7 @@ def instr():
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit()
+                exit()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     instructions = False
@@ -135,13 +136,14 @@ def instr():
         mainClock.tick(60)
 
 def dibujar_tablero(screen, size):
-    
     if size == 9:
         dimension = 94
     elif size == 13:
         dimension = 63
     elif size == 19:
         dimension = 42
+    else:
+        raise ValueError("El tablero no tiene un tamaño válido.")
     
     for i in range(size-1):
         for j in range(size-1):
@@ -154,17 +156,18 @@ def dibujar_tablero(screen, size):
 def partida(tablero):
     par = True
     
+    tab = pygame.image.load('Entrega_final/Tablero.png')
+    tab = pygame.transform.scale(tab, (800,800))
+
     while par:
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
-        tab = pygame.image.load('Entrega_final/Tablero.png')
-        tab = pygame.transform.scale(tab, (800,800))
         screen.blit(tab, (100,100))
         dibujar_tablero(screen, tablero)
        
         for event in pygame.event.get():
            if event.type == QUIT:
                pygame.quit()
-               sys.exit()
+               exit()
            if event.type == KEYDOWN:
                if event.key == K_ESCAPE:
                    par = False 
