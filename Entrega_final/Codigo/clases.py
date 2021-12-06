@@ -32,10 +32,12 @@ class Cluster:
     def actualizarCluster(self, tablero: np.ndarray):
         ficha = next(iter(self.__fichasDelCluster))
 
+        self.__fichasDelCluster = set()
+        self.__puntosDeLibertad = set()
+
         fichasPorInvestigar = list()
         fichasPorInvestigar.append(ficha)
         fichasInvestigadas  = set()
-        fichasInvestigadas.add(ficha)
 
         while fichasPorInvestigar:
             y, x = fichasPorInvestigar.pop()
@@ -49,6 +51,7 @@ class Cluster:
                         self.__puntosDeLibertad.add(vecino)
 
             fichasInvestigadas.add((y, x))
+            self.__fichasDelCluster.add((y, x))
 
     def numLibertades(self):
         return len(self.__puntosDeLibertad)
@@ -187,7 +190,7 @@ class Tablero_Go:
 
         for idx, clust in clustVecinos:
             clust.actualizarCluster(self._tableros[0])
-            if clust.numLibertades == 0:
+            if clust.numLibertades() == 0:
                 for x, y in clust.get_fichasEnCluster():
                     self._tableros[0][y, x] = FREE
                 self.__borrarClusterIdx(idx)

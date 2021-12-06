@@ -234,6 +234,7 @@ def partida(tablero: int):
 
     rectangulos = dame_espacios(tablero, dimension)
     click = False
+    jugador = go.BLACK
 
     while par:
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
@@ -247,11 +248,15 @@ def partida(tablero: int):
         if casilla is not None:
             rect = rectangulos[casilla[0], casilla[1]]
 
-            if mi_tablero.esEspacioValido(casilla[0], casilla[1], go.BLACK):
-                screen.blit(negra_a_poner, (rect.left, rect.top))
+            if mi_tablero.esEspacioValido(casilla[0], casilla[1], jugador):
+                if jugador == go.BLACK:
+                    screen.blit(negra_a_poner, (rect.left, rect.top))
+                else:
+                    screen.blit(blanca_a_poner, (rect.left, rect.top))
                 
                 if click:
                     mi_tablero.ponerFicha()
+                    jugador = not jugador
 
         for idx, (col, list_positions) in enumerate(mi_tablero.dibujarTablero()):
             for i, j in list_positions:
@@ -264,7 +269,7 @@ def partida(tablero: int):
                     screen.blit(blanca_puesta, (x, y))
 
                 draw_text(f"{idx}", font, (255, 255, 255), screen, x +
-                        dimension/4, y + dimension/4)
+                        dimension/3, y + dimension/4)
        
         click = False
 
