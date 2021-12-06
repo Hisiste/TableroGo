@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 from sys import exit
 
+import clases as go
+
 mainClock = pygame.time.Clock()
 pygame.init()
 screen = pygame.display.set_mode((1000, 1000), pygame.RESIZABLE)
@@ -11,6 +13,9 @@ font = pygame.font.SysFont(None, 40)
 
 click = False
 quit_ = False
+
+mesa_fondo = pygame.image.load('Entrega_final/Fondo.png')
+mesa_fondo = pygame.transform.scale(mesa_fondo, (1000,1000))
 
 # Función para colocar texto en pantalla
 def draw_text(text, font, color, surface, x, y):
@@ -27,8 +32,6 @@ def main_menu():
     bot_Instr   = pygame.Rect(400, 550, 200, 100)
     bot_Quit    = pygame.Rect(400, 700, 200, 100)
 
-    mesa_fondo = pygame.image.load('Entrega_final/Fondo.png')
-    mesa_fondo = pygame.transform.scale(mesa_fondo, (1000,1000))
     # Creamos los objetos y dentro del `while` solamente los dibujamos :3.
 
     while True:
@@ -73,7 +76,9 @@ def main_menu():
 def game():
     running = True
     click = False
+
     while running:
+        screen.blit(mesa_fondo, (0,0))
         draw_text('Selecciona el tamaño del tablero', font, (255, 255, 255), screen, 255, 100)
         
         # Obteniendo las coordenadas del mouse
@@ -139,9 +144,9 @@ def dibujar_tablero(screen, size):
     if size == 9:
         dimension = 94
     elif size == 13:
-        dimension = 63
+        dimension = 62.5
     elif size == 19:
-        dimension = 42
+        dimension = 41.7
     else:
         raise ValueError("El tablero no tiene un tamaño válido.")
     
@@ -151,18 +156,75 @@ def dibujar_tablero(screen, size):
             y = j * dimension + 124.8
             s = pygame.Rect(x, y, dimension, dimension)
             pygame.draw.rect(screen,(0, 0, 0),s,2)
+
+# def dame_espacios(screen, size):
+def dame_espacios(size):
+    if size == 9:
+        dimension = 94
+    elif size == 13:
+        dimension = 62.5
+    elif size == 19:
+        dimension = 41.7
+    else:
+        raise ValueError("El tablero no tiene un tamaño válido.")
     
+    offset = 124.8
+    rects = go.np.full((size, size), None)
+    for i in range(size):
+        for j in range(size):
+            x = i * dimension + offset - dimension/2
+            y = j * dimension + offset - dimension/2
+            s = pygame.Rect(x, y, dimension, dimension)
+            # pygame.draw.rect(screen,(255, 0, 0),s,2)
+            rects[i, j] = s
+
+    return rects
+
+def dibuja_en_xy(screen, figs: go.np.ndarray, x: int, y: int, size: int):
+    if size == 9:
+        dimension = 94
+    elif size == 13:
+        dimension = 62.5
+    elif size == 19:
+        dimension = 41.7
+    else:
+        raise ValueError("El tablero no tiene un tamaño válido.")
+
+    offset = 124.8
+    point = go.np.array((x, y)) - (offset - dimension/2)
+    point = point / dimension
+
+    if all(point < size) and all(point > 0):
+        point = go.np.floor(point)
+        point = go.np.int64(point)
+
+        pygame.draw.rect(screen, (255, 0, 0), figs[point[0], point[1]], 2)
 
 def partida(tablero):
     par = True
     
-    tab = pygame.image.load('Entrega_final/Tablero.png')
+    if tablero == 9:
+        file = 'Entrega_final/Tablero 9x9.png'
+    elif tablero == 13:
+        file = 'Entrega_final/Tablero 13x13.png'
+    elif tablero == 19:
+        file = 'Entrega_final/Tablero 19x19.png'
+    else:
+        raise AssertionError("El tablero no tiene un tamaño válido.")
+
+    tab = pygame.image.load(file)
     tab = pygame.transform.scale(tab, (800,800))
 
     while par:
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
         screen.blit(tab, (100,100))
-        dibujar_tablero(screen, tablero)
+        # dibujar_tablero(screen, tablero)
+
+        # Obteniendo las coordenadas del mouse
+        mx, my = pygame.mouse.get_pos()
+        rects = dame_espacios(tablero)
+        
+        dibuja_en_xy(screen, rects, mx, my, tablero)
        
         for event in pygame.event.get():
            if event.type == QUIT:

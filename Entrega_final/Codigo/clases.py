@@ -155,8 +155,6 @@ class Tablero_Go:
 
         self.__prepararFuturo()
         self._tableros[0][y, x] = color
-        if np.array_equal(self._tableros[0], self._tableros[2]):
-            return False
 
         clustVecinos = []
         for vecino in dameVecinos(y, x, self._tableros[0].shape):
@@ -182,7 +180,10 @@ class Tablero_Go:
                 self.__borrarClusterIdx(idx)
 
         nuevoCluster.actualizarCluster(self._tableros[0])
-        if nuevoCluster.numLibertades() == 0:
+
+        if np.array_equal(self._tableros[0], self._tableros[2]):
+            return False
+        elif nuevoCluster.numLibertades() == 0:
             return False
         else:
             return True
@@ -197,6 +198,6 @@ class Tablero_Go:
         pass
 
     def dibujarTablero(self):
-        pass
+        return [(x.color, x.get_fichasEnCluster()) for x in self._listaClusters[1]]
 
 
