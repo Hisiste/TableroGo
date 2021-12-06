@@ -158,16 +158,7 @@ def dibujar_tablero(screen, size):
             pygame.draw.rect(screen,(0, 0, 0),s,2)
 
 # def dame_espacios(screen, size):
-def dame_espacios(size):
-    if size == 9:
-        dimension = 94
-    elif size == 13:
-        dimension = 62.5
-    elif size == 19:
-        dimension = 41.7
-    else:
-        raise ValueError("El tablero no tiene un tamaño válido.")
-    
+def dame_espacios(size: int, dimension: float):
     offset = 124.8
     rects = go.np.full((size, size), None)
     for i in range(size):
@@ -180,16 +171,7 @@ def dame_espacios(size):
 
     return rects
 
-def dibuja_en_xy(screen, figs: go.np.ndarray, x: int, y: int, size: int):
-    if size == 9:
-        dimension = 94
-    elif size == 13:
-        dimension = 62.5
-    elif size == 19:
-        dimension = 41.7
-    else:
-        raise ValueError("El tablero no tiene un tamaño válido.")
-
+def dibuja_en_xy(screen, figs: go.np.ndarray, x: int, y: int, size: int, dimension: float):
     offset = 124.8
     point = go.np.array((x, y)) - (offset - dimension/2)
     point = point / dimension
@@ -198,21 +180,40 @@ def dibuja_en_xy(screen, figs: go.np.ndarray, x: int, y: int, size: int):
         point = go.np.floor(point)
         point = go.np.int64(point)
 
-        pygame.draw.rect(screen, (255, 0, 0), figs[point[0], point[1]], 2)
+        # pygame.draw.rect(screen, (255, 0, 0), figs[point[0], point[1]], 2)
+        return figs[point[0], point[1]]
 
 def partida(tablero):
     par = True
     
+    file_ficha_negra  = 'Entrega_final/Ficha negra.png'
+    file_ficha_blanca = 'Entrega_final/Ficha blanca.png'
+
     if tablero == 9:
-        file = 'Entrega_final/Tablero 9x9.png'
+        file_tablero = 'Entrega_final/Tablero 9x9.png'
+        dimension = 94
     elif tablero == 13:
-        file = 'Entrega_final/Tablero 13x13.png'
+        file_tablero = 'Entrega_final/Tablero 13x13.png'
+        dimension = 62.5
     elif tablero == 19:
-        file = 'Entrega_final/Tablero 19x19.png'
+        dimension = 41.7
+        file_tablero = 'Entrega_final/Tablero 19x19.png'
     else:
         raise AssertionError("El tablero no tiene un tamaño válido.")
 
-    tab = pygame.image.load(file)
+    negra_a_poner  = pygame.image.load(file_ficha_negra)
+    negra_a_poner  = pygame.transform.scale(negra_a_poner,  (int(dimension), int(dimension)))
+    negra_a_poner.set_alpha(128)
+    negra_puesta   = pygame.image.load(file_ficha_negra)
+    negra_puesta   = pygame.transform.scale(negra_puesta,  (int(dimension), int(dimension)))
+
+    blanca_a_poner = pygame.image.load(file_ficha_blanca)
+    blanca_a_poner = pygame.transform.scale(blanca_a_poner, (int(dimension), int(dimension)))
+    blanca_a_poner.set_alpha(128)
+    blanca_puesta  = pygame.image.load(file_ficha_blanca)
+    blanca_puesta  = pygame.transform.scale(blanca_puesta, (int(dimension), int(dimension)))
+
+    tab = pygame.image.load(file_tablero)
     tab = pygame.transform.scale(tab, (800,800))
 
     while par:
@@ -222,9 +223,11 @@ def partida(tablero):
 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
-        rects = dame_espacios(tablero)
+        rects = dame_espacios(tablero, dimension)
         
-        dibuja_en_xy(screen, rects, mx, my, tablero)
+        rect = dibuja_en_xy(screen, rects, mx, my, tablero, dimension)
+        if rect is not None:
+            screen.blit(negra_a_poner, (rect.left, rect.top))
        
         for event in pygame.event.get():
            if event.type == QUIT:
