@@ -183,8 +183,22 @@ def dibuja_en_xy(screen, figs: go.np.ndarray, x: int, y: int, size: int, dimensi
         # pygame.draw.rect(screen, (255, 0, 0), figs[point[0], point[1]], 2)
         return figs[point[0], point[1]]
 
-def partida(tablero):
+def busca_casilla(x: int, y: int, size: int, dimension: float):
+    offset = 124.8
+    point = go.np.array((x, y)) - (offset - dimension/2)
+    point = point / dimension
+
+    if all(point < size) and all(point > 0):
+        point = go.np.floor(point)
+        point = go.np.int64(point)
+
+        return point
+    else:
+        return None
+
+def partida(tablero: int):
     par = True
+    offset = 124.8
     
     file_ficha_negra  = 'Entrega_final/Ficha negra.png'
     file_ficha_blanca = 'Entrega_final/Ficha blanca.png'
@@ -201,6 +215,8 @@ def partida(tablero):
     else:
         raise AssertionError("El tablero no tiene un tamaño válido.")
 
+    mi_tablero = go.Tablero_Go(tablero)
+
     negra_a_poner  = pygame.image.load(file_ficha_negra)
     negra_a_poner  = pygame.transform.scale(negra_a_poner,  (int(dimension), int(dimension)))
     negra_a_poner.set_alpha(128)
@@ -216,6 +232,9 @@ def partida(tablero):
     tab = pygame.image.load(file_tablero)
     tab = pygame.transform.scale(tab, (800,800))
 
+    rectangulos = dame_espacios(tablero, dimension)
+    click = False
+
     while par:
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
         screen.blit(tab, (100,100))
@@ -223,12 +242,32 @@ def partida(tablero):
 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
-        rects = dame_espacios(tablero, dimension)
+        casilla = busca_casilla(mx, my, tablero, dimension)
         
-        rect = dibuja_en_xy(screen, rects, mx, my, tablero, dimension)
-        if rect is not None:
-            screen.blit(negra_a_poner, (rect.left, rect.top))
+        if casilla is not None:
+            rect = rectangulos[casilla[0], casilla[1]]
+
+            if mi_tablero.esEspacioValido(casilla[0], casilla[1], go.BLACK):
+                screen.blit(negra_a_poner, (rect.left, rect.top))
+                
+                if click:
+                    mi_tablero.ponerFicha()
+
+        for idx, (col, list_positions) in enumerate(mi_tablero.dibujarTablero()):
+            for i, j in list_positions:
+                x = i * dimension + offset - dimension/2
+                y = j * dimension + offset - dimension/2
+
+                if col == go.BLACK:
+                    screen.blit(negra_puesta,  (x, y))
+                else:
+                    screen.blit(blanca_puesta, (x, y))
+
+                draw_text(f"{idx}", font, (255, 255, 255), screen, x +
+                        dimension/4, y + dimension/4)
        
+        click = False
+
         for event in pygame.event.get():
            if event.type == QUIT:
                pygame.quit()
@@ -236,6 +275,9 @@ def partida(tablero):
            if event.type == KEYDOWN:
                if event.key == K_ESCAPE:
                    par = False 
+           if event.type == MOUSEBUTTONDOWN:
+               if event.button == 1:
+                   click = True
                    
         pygame.display.update()
         mainClock.tick(60)

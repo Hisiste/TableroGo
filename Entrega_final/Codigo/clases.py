@@ -44,11 +44,11 @@ class Cluster:
                 if vecino not in fichasInvestigadas:
                     if tablero[vecino] == self.color:
                         self.__fichasDelCluster.add(vecino)
-                        fichasInvestigadas.add(vecino)
                         fichasPorInvestigar.append(vecino)
                     elif tablero[vecino] == FREE:
                         self.__puntosDeLibertad.add(vecino)
-                        fichasInvestigadas.add(vecino)
+
+            fichasInvestigadas.add((y, x))
 
     def numLibertades(self):
         return len(self.__puntosDeLibertad)
@@ -90,11 +90,22 @@ class Tablero_Go:
         self.__porEliminar.append(self._listaClusters[0][idx])
         self._listaClusters[0][idx] = None
 
-        for i in range(idx, self._tamano**2):
-            if self._listaClusters[0][i + 1] is None:
+    def __actDespuesDeBorrar(self):
+        j = 1
+
+        for i in range(self._tamano**2):
+            if self._listaClusters[0][i] is not None:
+                j += 1
+                continue
+
+            while j < self._tamano**2 and self._listaClusters[0][j] is None:
+                j += 1
+
+            if j >= self._tamano**2:
                 break
 
-            self._listaClusters[0][i], self._listaClusters[0][i + 1] = self._listaClusters[0][i + 1], self._listaClusters[0][i]
+            self._listaClusters[0][i], self._listaClusters[0][j] = self._listaClusters[0][j], self._listaClusters[0][i]
+            j += 1
 
     def __agregarCluster(self, clust: Cluster):
         """Añadir un nuevo cluster a la lista.
@@ -145,6 +156,9 @@ class Tablero_Go:
 
         self._clustTablero  = np.full((self._tamano, self._tamano), FREE)
         for idx, cluster in enumerate(self._listaClusters[1]):
+            if cluster == None:
+                break
+
             for x, y in cluster.get_fichasEnCluster():
                 self._clustTablero[y, x] = idx
 
@@ -155,22 +169,21 @@ class Tablero_Go:
 
         self.__prepararFuturo()
         self._tableros[0][y, x] = color
+        nuevoCluster = Cluster(x, y, color, self._tableros[0])
+        self.__agregarCluster(nuevoCluster)
 
-        clustVecinos = []
+        clustVecinos = set()
         for vecino in dameVecinos(y, x, self._tableros[0].shape):
             if self._clustTablero[vecino] != FREE:
-                clustVecinos.append((self._clustTablero[vecino], self._listaClusters[0][self._clustTablero[vecino]]))
+                clustVecinos.add((self._clustTablero[vecino], self._listaClusters[0][self._clustTablero[vecino]]))
 
         if len(clustVecinos) == 0:
             return True
 
-        for idx, clust in clustVecinos:
+        for idx, clust in list(clustVecinos):
             if clust.color == color:
                 self.__borrarClusterIdx(idx)
         clustVecinos = [x for x in clustVecinos if x[1].color != color]
-
-        nuevoCluster = Cluster(x, y, color, self._tableros[0])
-        self.__agregarCluster(nuevoCluster)
 
         for idx, clust in clustVecinos:
             clust.actualizarCluster(self._tableros[0])
@@ -179,6 +192,7 @@ class Tablero_Go:
                     self._tableros[0][y, x] = FREE
                 self.__borrarClusterIdx(idx)
 
+        self.__actDespuesDeBorrar()
         nuevoCluster.actualizarCluster(self._tableros[0])
 
         if np.array_equal(self._tableros[0], self._tableros[2]):
@@ -198,6 +212,7 @@ class Tablero_Go:
         pass
 
     def dibujarTablero(self):
-        return [(x.color, x.get_fichasEnCluster()) for x in self._listaClusters[1]]
+        return [(x.color, x.get_fichasEnCluster()) for x in
+                self._listaClusters[1] if x is not None]
 
 
