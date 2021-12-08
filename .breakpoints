@@ -7,20 +7,6 @@
         "version": 1,
         "index": 0
       }
-    ],
-    "Entrega_final/Codigo/interfaz.py": [
-      {
-        "id": "caf76e02-fe24-4a71-ab99-0f369afb27f3",
-        "line": 32,
-        "version": 988,
-        "index": 925
-      },
-      {
-        "id": "b2f441a6-cfd7-439f-ad07-0e2d46ba92ce",
-        "line": 59,
-        "version": 988,
-        "index": 1829
-      }
     ]
   }
 }

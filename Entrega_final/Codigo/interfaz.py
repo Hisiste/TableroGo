@@ -1,7 +1,6 @@
 import pygame
 import time
 import threading
-# import math
 from pygame.locals import *
 from sys import exit
 import clases as go
@@ -15,6 +14,7 @@ global minutos
 segundos = 0
 minutos = 0
 
+font_min = pygame.font.SysFont(None, 30)
 font = pygame.font.SysFont(None, 40)
 
 click = False
@@ -27,6 +27,8 @@ bot_largo  = pygame.image.load('Entrega_final/Botón Largo.png')
 bot_largo  = pygame.transform.scale(bot_largo, (200,100))
 bot_corto  = pygame.image.load('Entrega_final/Botón corto.png')
 bot_corto  = pygame.transform.scale(bot_corto, (100,100))
+bot_grande  = pygame.image.load('Entrega_final/Botón Largo.png')  
+bot_grande  = pygame.transform.scale(bot_grande, (500,250))
 
 # Función para colocar texto en pantalla
 def draw_text(text, font, color, surface, x, y):
@@ -161,6 +163,13 @@ def instr():
     
     while instructions:
         draw_text('INSTRUCCIONES DE GO', font, (255, 255, 255), screen, 350, 100)
+
+        d = open("Entrega_final/Instrucciones.txt")
+        f = d.read()
+        Instrucciones = f.split(sep='\n')
+        for i in range(0,32):
+          draw_text(Instrucciones[(i)], font_min, (255, 255, 255), screen, 150, 200+(i*20))
+        
         
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -169,6 +178,7 @@ def instr():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     instructions = False
+                    d.close()
         
         pygame.display.update()
         mainClock.tick(60)
@@ -198,39 +208,83 @@ def busca_casilla(x: int, y: int, size: int, dimension: float, offset: float):
         return None
 
 def crono():
-  global segundos
-  global minutos
-  segundos = int(segundos)
-  minutos = int(minutos)
-  if segundos == 59:
-    segundos = 0
-    minutos += 1
-    return crono()
-  else:
-    segundos +=1
-    time.sleep(1)
-    return crono()
+    global segundos
+    global minutos
+    segundos = int(segundos)
+    minutos = int(minutos)
+    if segundos == 60:
+        segundos = 0
+        minutos += 1
+    else:
+        segundos +=1
+        time.sleep(1)
+
+def Rendirse():
+  Rendirse = True
+  click = False
+
+  bot_Si = pygame.Rect(600, 480, 100, 100)
+  bot_No = pygame.Rect(800, 480, 100, 100)
+  while Rendirse:
+    pygame.draw.rect(screen, (255, 255, 255), bot_Si)
+    pygame.draw.rect(screen, (255, 255, 255), bot_No)
+    screen.blit(bot_grande,((500, 375)))
+    draw_text('¿Seguro que desea rendirse?', font, (255, 255, 255), screen, 555, 420)
+    screen.blit(bot_corto, ((600, 480)))
+    screen.blit(bot_corto, ((800, 480)))
+    draw_text('SI', font, (0, 0, 0), screen, 635, 525)
+    draw_text('NO', font, (0, 0, 0), screen, 835, 525)
+
+    # Obteniendo las coordenadas del mouse
+    mx, my = pygame.mouse.get_pos()
+
+    if click:
+      if bot_Si.collidepoint((mx, my)) :
+        return True
+        Rendirse = False
+      if bot_No.collidepoint((mx, my)):
+        Rendirse = False
+
+    for event in pygame.event.get():
+      if event.type == QUIT:
+        pygame.quit()
+        exit()
+      if event.type == KEYDOWN:
+        if event.key == K_ESCAPE:
+          Rendirse = False
+      if event.type == MOUSEBUTTONDOWN:
+        if event.button == 1:
+          click = True
+
+    pygame.display.update()
+    mainClock.tick(60)
 
 def partida(tablero: int):
     par        = True
     click      = False
     jugador    = go.BLACK
     offset     = 124.8
+    paso       = 0
     casillaAnt = go.np.array([])
     ultimaFich = go.np.array([])
-    
-    # Creando un hilo que se encargue de mantener el cronómetro
-    hilo = threading.Thread(target=crono, args=())
-    hilo.start()
+
+    Jugadores_font = pygame.font.SysFont(None, 50)
+    Jugadores_bold_font = pygame.font.SysFont(None, 50, italic = True)
+    crono_font = pygame.font.SysFont(None, 60)
     
     mesa_fondo = pygame.image.load('Entrega_final/Fondo.jpg')
     mesa_fondo = pygame.transform.scale(mesa_fondo, (1500, 1000))
     screen     = pygame.display.set_mode((1500, 1000), pygame.RESIZABLE)
-    bot_largo  = pygame.image.load('Entrega_final/Botón Largo.png')
-    bot_largo  = pygame.transform.scale(bot_largo, (500,250))
-
+    
     file_ficha_negra  = 'Entrega_final/Ficha negra.png'
     file_ficha_blanca = 'Entrega_final/Ficha blanca.png'
+
+    # Creación de botones
+    bot_Pasar     = pygame.Rect(1150, 400, 200, 100)
+    bot_Rendirse  = pygame.Rect(1150, 550, 200, 100)
+    bot_Empate    = pygame.Rect(1550, 700, 200, 100)
+    linea_J1  = pygame.Rect(1000, 290, 160, 5)
+    linea_J2  = pygame.Rect(1230, 290, 160, 5)
 
     if tablero == 9:
         file_tablero = 'Entrega_final/Tablero 9x9.png'
@@ -265,35 +319,77 @@ def partida(tablero: int):
     mi_tablero = go.Tablero_Go(tablero)
 
     while par:
-        draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
+        draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)
+
+        # Colocando los botones de selección de tablero
+        pygame.draw.rect(screen, (255, 255, 255), bot_Pasar)
+        pygame.draw.rect(screen, (255, 255, 255), bot_Rendirse)
+        pygame.draw.rect(screen, (255, 255, 255), bot_Empate)
+ 
         screen.blit(mesa_fondo,(0,0))
         screen.blit(tab, (100,100))
-        screen.blit(bot_largo,(950 ,100))
+        screen.blit(bot_grande,(950 ,100))
         # dibujar_tablero(screen, tablero)
 
+        screen.blit(bot_largo,((1100,400)))
+        draw_text('Pasar', font, (0, 0, 0), screen, 1160, 440)
+        screen.blit(bot_largo,((1100,550)))
+        draw_text('Rendirse', font, (0, 0, 0), screen, 1138, 590)
+        screen.blit(bot_largo,((1100,700)))
+        draw_text('Ofrecer', font, (0, 0, 0), screen, 1145,725)
+        draw_text('un empate', font, (0, 0, 0), screen, 1130,755)
+
         # Iniciando el cronómetro de la partida
-        
+        #crono()
         global segundos
         global minutos
         segundos = int(segundos)
         minutos = int(minutos)
 
         if segundos <= 9:
-          segundos = '0' + str(segundos)
+            segundos = '0' + str(segundos)
         else:
-          segundos = str(segundos)
+            segundos = str(segundos)
 
         if minutos <= 9:
-          minutos  = '0' + str(minutos)
+            minutos  = '0' + str(minutos)
         else:
-          minutos  = str(minutos)
+            minutos  = str(minutos)
 
-        draw_text(str(minutos) + ' :', font, (255, 255, 255), screen, 1160, 125)
-        draw_text(str(segundos), font, (255, 255, 255), screen, 1215, 125)
+        draw_text(str(minutos) + ' :', crono_font, (255, 255, 255), screen, 1130, 135)
+        draw_text(str(segundos), crono_font, (255, 255, 255), screen, 1215, 135)
+
+        # Subrayando el nombre del jugador actual
+        if jugador == go.BLACK:
+          pygame.draw.rect(screen, (255, 255, 255), linea_J1)
+        else:
+          pygame.draw.rect(screen, (0, 0, 0), linea_J2)
+
+
+        draw_text('Jugador 1', Jugadores_font, (0, 0, 0), screen, 1000, 250)
+        draw_text('Jugador 2', Jugadores_font, (255, 255, 255), screen, 1230, 250)
 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
         casilla = busca_casilla(mx, my, tablero, dimension, offset)
+
+                # Eventos para los botones
+        if click:
+          if bot_Pasar.collidepoint((mx, my)):
+            jugador = not jugador
+            paso +=1
+            if paso == 2:
+              par = False
+              fin_partida((10,10))
+          if bot_Rendirse.collidepoint((mx, my)):
+            if Rendirse():
+              par = False
+              fin_partida((10,10))
+            else:
+              pass
+          if bot_Empate.collidepoint((mx, my)):
+            pass
+
         
         # En caso de que el mouse esté sobre una casilla válida del tablero.
         if casilla is not None:
@@ -313,6 +409,7 @@ def partida(tablero: int):
                     mi_tablero.ponerFicha()
                     # Cambiamos de jugador
                     jugador = not jugador
+                    paso = 0
                     ultimaFich = go.np.array([espacio[0], espacio[1]])
 
         # Dibujamos las fichas tomándolas directamente del tablero.
@@ -337,16 +434,23 @@ def partida(tablero: int):
         click = False
 
         for event in pygame.event.get():
-           if event.type == QUIT:
-               pygame.quit()
-               exit()
-           if event.type == KEYDOWN:
-               if event.key == K_ESCAPE:
-                   par = False
-                   game() 
-           if event.type == MOUSEBUTTONDOWN:
-               if event.button == 1:
-                   click = True
+            if event.type == QUIT:
+                pygame.quit()
+                exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    par = False
+                    screen = pygame.display.set_mode((1000, 1000))
+ 
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
 
         pygame.display.update()
         mainClock.tick(60)
+
+def fin_partida(puntaje):
+  fin = True
+
+  while fin:
+    pass  

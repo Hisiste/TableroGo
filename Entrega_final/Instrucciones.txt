@@ -1,0 +1,32 @@
+Los tableros son una cuadrícula de 9, 13 o 19 líneas horizontales y
+verticales de forma estándar.
+Las fichas son circulares y se ponen en las intersecciones vacías de la
+cuadrícula. Existen dos jugadores y
+cada quien escoge un color de ficha, ya sea negro o blanco. El de las fichas
+de color negro siempre será el
+que empieza poniendo la primera ficha. Después se intercalan los jugadores
+para ir poniendo fichas.
+Las fichas se pueden agrupar y hacerce más fuertes. Estas solamente se
+consideran conectadas
+cuando son adyacentes a sí mismas, o puedes conectarlas pasando por fichas
+adyacentes del mismo color.
+Las fichas se pueden agrupar y hacerce más fuertes. Estas solamente se
+consideran conectadas
+cuando son adyacentes a sí mismas, o puedes conectarlas pasando por fichas
+adyacentes del mismo color.
+Al momento de que un grupo pierda todas las libertades, es capturado.
+
+El número de fichas que fueron capturadas restarán puntos, esto
+principalmente para penalizar al jugador.
+Hay dos maneras en que el juego puede terminar. La primera es por
+resignación de alguno de los jugadores. La otra implica que ambos jugadores
+“pasaron”. 
+Cualquier jugador siempre puede “pasar”, es decir, no hace ningún movimiento
+en su turno. Esto debido a cualquier movimiento que vea le perjudica en lugar
+de ayudar.
+Si el juego termina porque ambos jugadores pasaron, se cuentan los puntos.
+Siendo Go un juego sobre conquistar territorio, los puntos son los espacios
+vacíos del tablero que cada jugador rodea. Las fichas consideradas
+capturadas se retiran del tablero y son restados al puntaje final. Existe la
+convención de regalar puntos al jugador con fichas blancas, pues tuvo la
+desventaja de empezar después.
