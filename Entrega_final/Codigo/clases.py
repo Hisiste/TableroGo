@@ -79,9 +79,11 @@ class Tablero_Go:
         self._listaClusters = np.full((2, self._tamano**2), None)
         # listaClusters[0] -> futuro 1 movimiento.
         # listaClusters[1] -> presente.
-        self._clustTablero  = np.full((self._tamano, self._tamano), FREE)
-        self.__porAgregar     = []
-        self.__porEliminar    = []
+        self._clustTablero = np.full((self._tamano, self._tamano), FREE)
+        self.__porAgregar  = []
+        self.__porEliminar = []
+
+        self.__cache = None
 
     def __borrarClusterIdx(self, idx: int):
         """Borrar el cluster de índice `idx` del tablero del futuro.
@@ -167,7 +169,12 @@ class Tablero_Go:
 
 
     def esEspacioValido(self, x: int, y: int, color: bool):
+        if self.__cache is not None:
+            if self.__cache[0] == (x, y, color):
+                return self.__cache[1]
+
         if self._tableros[1][(y, x)] != FREE:
+            self.__cache = ((x, y, color), False)
             return False
 
         self.__prepararFuturo()
@@ -181,6 +188,7 @@ class Tablero_Go:
                 clustVecinos.add((self._clustTablero[vecino], self._listaClusters[0][self._clustTablero[vecino]]))
 
         if len(clustVecinos) == 0:
+            self.__cache = ((x, y, color), True)
             return True
 
         for idx, clust in list(clustVecinos):
@@ -199,10 +207,13 @@ class Tablero_Go:
         nuevoCluster.actualizarCluster(self._tableros[0])
 
         if np.array_equal(self._tableros[0], self._tableros[2]):
+            self.__cache = ((x, y, color), False)
             return False
         elif nuevoCluster.numLibertades() == 0:
+            self.__cache = ((x, y, color), False)
             return False
         else:
+            self.__cache = ((x, y, color), True)
             return True
 
     def ponerFicha(self):

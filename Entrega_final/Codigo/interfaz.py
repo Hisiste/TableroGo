@@ -265,7 +265,6 @@ def partida(tablero: int):
     jugador    = go.BLACK
     offset     = 124.8
     paso       = 0
-    casillaAnt = go.np.array([])
     ultimaFich = go.np.array([])
 
     Jugadores_font = pygame.font.SysFont(None, 50)
@@ -395,8 +394,7 @@ def partida(tablero: int):
         if casilla is not None:
             # Veamos si la casilla es jugable. Esto es, el jugador puede poner
             # una ficha en la casilla donde está el mouse.
-            if go.np.array_equal(casillaAnt, casilla) or mi_tablero.esEspacioValido(casilla[0], casilla[1], jugador):
-                casillaAnt = casilla.copy()
+            if mi_tablero.esEspacioValido(casilla[0], casilla[1], jugador):
                 espacio = rectangulos[casilla[0], casilla[1]]
 
                 if jugador == go.BLACK:
@@ -441,7 +439,6 @@ def partida(tablero: int):
                 if event.key == K_ESCAPE:
                     par = False
                     screen = pygame.display.set_mode((1000, 1000))
- 
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
