@@ -14,9 +14,9 @@ global minutos
 segundos = 0
 minutos = 0
 
-font_min = pygame.font.SysFont(None, 30)
-font = pygame.font.SysFont(None, 40)
-font_max = pygame.font.SysFont(None, 70)
+font_min = pygame.font.SysFont('arial', 20)
+font = pygame.font.SysFont('arial', 30)
+font_max = pygame.font.SysFont('arial', 60)
 
 click = False
 quit_ = False
@@ -164,6 +164,7 @@ def instr():
     instructions = True
     
     while instructions:
+        screen.blit(mesa_fondo,(0,0))
         draw_text('INSTRUCCIONES DE GO', font, (255, 255, 255), screen, 350, 100)
 
         d = open("Entrega_final/Instrucciones.txt")
@@ -273,9 +274,9 @@ def partida(tablero: int):
     global segundos
     global minutos
 
-    Jugadores_font = pygame.font.SysFont(None, 50)
-    Jugadores_bold_font = pygame.font.SysFont(None, 50, italic = True)
-    crono_font = pygame.font.SysFont(None, 60)
+    Jugadores_font = pygame.font.SysFont('arial', 40)
+    Jugadores_bold_font = pygame.font.SysFont('arial', 40, italic = True)
+    crono_font = pygame.font.SysFont('arial', 50)
     
     mesa_fondo = pygame.image.load('Entrega_final/Fondo.jpg')
     mesa_fondo = pygame.transform.scale(mesa_fondo, (1500, 1000))
