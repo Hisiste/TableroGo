@@ -16,6 +16,7 @@ minutos = 0
 
 font_min = pygame.font.SysFont(None, 30)
 font = pygame.font.SysFont(None, 40)
+font_max = pygame.font.SysFont(None, 70)
 
 click = False
 quit_ = False
@@ -56,6 +57,7 @@ def main_menu():
         pygame.draw.rect(screen, (255, 255, 255), bot_Instr)
         pygame.draw.rect(screen, (255, 255, 255), bot_Quit)
         screen.blit(mesa_fondo,(0,0))
+        draw_text('GO', font_max, (255, 255, 255), screen, 465, 200)
                 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
