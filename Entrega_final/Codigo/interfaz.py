@@ -1,6 +1,5 @@
 import pygame
 import time
-import threading
 from pygame.locals import *
 from sys import exit
 import clases as go
