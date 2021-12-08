@@ -1,7 +1,7 @@
 import pygame
 import time
 import threading
-import math
+# import math
 from pygame.locals import *
 from sys import exit
 import clases as go
@@ -173,34 +173,19 @@ def instr():
         pygame.display.update()
         mainClock.tick(60)
 
-# def dame_espacios(screen, size):
-def dame_espacios(size: int, dimension: float):
-    offset = 124.8
+
+def dame_espacios(size: int, dimension: float, offset: float):
     rects = go.np.full((size, size), None)
+
     for i in range(size):
         for j in range(size):
             x = i * dimension + offset - dimension/2
             y = j * dimension + offset - dimension/2
-            s = pygame.Rect(x, y, dimension, dimension)
-            # pygame.draw.rect(screen,(255, 0, 0),s,2)
-            rects[i, j] = s
+            rects[i, j] = (x, y)
 
     return rects
 
-def dibuja_en_xy(screen, figs: go.np.ndarray, x: int, y: int, size: int, dimension: float):
-    offset = 124.8
-    point = go.np.array((x, y)) - (offset - dimension/2)
-    point = point / dimension
-
-    if all(point < size) and all(point > 0):
-        point = go.np.floor(point)
-        point = go.np.int64(point)
-
-        # pygame.draw.rect(screen, (255, 0, 0), figs[point[0], point[1]], 2)
-        return figs[point[0], point[1]]
-
-def busca_casilla(x: int, y: int, size: int, dimension: float):
-    offset = 124.8
+def busca_casilla(x: int, y: int, size: int, dimension: float, offset: float):
     point = go.np.array((x, y)) - (offset - dimension/2)
     point = point / dimension
 
@@ -227,16 +212,20 @@ def crono():
     return crono()
 
 def partida(tablero: int):
-    par = True
-    offset = 124.8
-
+    par        = True
+    click      = False
+    jugador    = go.BLACK
+    offset     = 124.8
+    casillaAnt = go.np.array([])
+    ultimaFich = go.np.array([])
+    
     # Creando un hilo que se encargue de mantener el cronómetro
     hilo = threading.Thread(target=crono, args=())
     hilo.start()
     
     mesa_fondo = pygame.image.load('Entrega_final/Fondo.jpg')
     mesa_fondo = pygame.transform.scale(mesa_fondo, (1500, 1000))
-    screen = pygame.display.set_mode((1500, 1000), pygame.RESIZABLE)
+    screen     = pygame.display.set_mode((1500, 1000), pygame.RESIZABLE)
     bot_largo  = pygame.image.load('Entrega_final/Botón Largo.png')
     bot_largo  = pygame.transform.scale(bot_largo, (500,250))
 
@@ -255,26 +244,25 @@ def partida(tablero: int):
     else:
         raise AssertionError("El tablero no tiene un tamaño válido.")
 
-    mi_tablero = go.Tablero_Go(tablero)
-
-    negra_a_poner  = pygame.image.load(file_ficha_negra)
-    negra_a_poner  = pygame.transform.scale(negra_a_poner,  (int(dimension), int(dimension)))
-    negra_a_poner.set_alpha(128)
+    # Cargamos las imágenes de las fichas y el tablero, y escalamos conforme nos
+    # convenga.
     negra_puesta   = pygame.image.load(file_ficha_negra)
     negra_puesta   = pygame.transform.scale(negra_puesta,  (int(dimension), int(dimension)))
+    negra_a_poner  = negra_puesta.copy()
+    negra_a_poner.set_alpha(128)
 
-    blanca_a_poner = pygame.image.load(file_ficha_blanca)
-    blanca_a_poner = pygame.transform.scale(blanca_a_poner, (int(dimension), int(dimension)))
-    blanca_a_poner.set_alpha(128)
     blanca_puesta  = pygame.image.load(file_ficha_blanca)
     blanca_puesta  = pygame.transform.scale(blanca_puesta, (int(dimension), int(dimension)))
+    blanca_a_poner = blanca_puesta.copy()
+    blanca_a_poner.set_alpha(128)
 
     tab = pygame.image.load(file_tablero)
     tab = pygame.transform.scale(tab, (800,800))
 
-    rectangulos = dame_espacios(tablero, dimension)
-    click = False
-    jugador = go.BLACK
+    # Calculamos los espacios de las fichas en el tablero e inicializamos la
+    # clase `Tablero_Go`.
+    rectangulos = dame_espacios(tablero, dimension, offset)
+    mi_tablero = go.Tablero_Go(tablero)
 
     while par:
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
@@ -305,34 +293,47 @@ def partida(tablero: int):
 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
-        casilla = busca_casilla(mx, my, tablero, dimension)
+        casilla = busca_casilla(mx, my, tablero, dimension, offset)
         
+        # En caso de que el mouse esté sobre una casilla válida del tablero.
         if casilla is not None:
-            rect = rectangulos[casilla[0], casilla[1]]
+            # Veamos si la casilla es jugable. Esto es, el jugador puede poner
+            # una ficha en la casilla donde está el mouse.
+            if go.np.array_equal(casillaAnt, casilla) or mi_tablero.esEspacioValido(casilla[0], casilla[1], jugador):
+                casillaAnt = casilla.copy()
+                espacio = rectangulos[casilla[0], casilla[1]]
 
-            if mi_tablero.esEspacioValido(casilla[0], casilla[1], jugador):
                 if jugador == go.BLACK:
-                    screen.blit(negra_a_poner, (rect.left, rect.top))
+                    screen.blit(negra_a_poner,  (espacio[0], espacio[1]))
                 else:
-                    screen.blit(blanca_a_poner, (rect.left, rect.top))
+                    screen.blit(blanca_a_poner, (espacio[0], espacio[1]))
                 
+                # Si el jugador hizo click, ponemos la ficha en el tablero.
                 if click:
                     mi_tablero.ponerFicha()
+                    # Cambiamos de jugador
                     jugador = not jugador
+                    ultimaFich = go.np.array([espacio[0], espacio[1]])
 
-        for idx, (col, list_positions) in enumerate(mi_tablero.dibujarTablero()):
+        # Dibujamos las fichas tomándolas directamente del tablero.
+        for col, list_positions in mi_tablero.dibujarTablero():
             for i, j in list_positions:
-                x = i * dimension + offset - dimension/2
-                y = j * dimension + offset - dimension/2
+                espacio = rectangulos[i, j]
 
                 if col == go.BLACK:
-                    screen.blit(negra_puesta,  (x, y))
+                    screen.blit(negra_puesta,  (espacio[0], espacio[1]))
                 else:
-                    screen.blit(blanca_puesta, (x, y))
+                    screen.blit(blanca_puesta, (espacio[0], espacio[1]))
 
-                draw_text(f"{idx}", font, (255, 255, 255), screen, x +
-                        dimension/3, y + dimension/4)
-       
+                # draw_text(f"{idx}", font, (255, 255, 255), screen, x +
+                        # dimension/3, y + dimension/4)
+
+        # Dibujamos un rectángulo rojo sobre la última ficha que fue puesta en
+        # el tablero.
+        if len(ultimaFich) > 0:
+            pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(ultimaFich[0] +
+                dimension/4, ultimaFich[1] + dimension/4, dimension/2, dimension/2), 2)
+
         click = False
 
         for event in pygame.event.get():
@@ -346,6 +347,6 @@ def partida(tablero: int):
            if event.type == MOUSEBUTTONDOWN:
                if event.button == 1:
                    click = True
-                   
+
         pygame.display.update()
         mainClock.tick(60)
