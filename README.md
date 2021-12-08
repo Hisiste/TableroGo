@@ -12,7 +12,7 @@ Este proyecto se basa en implementar el juego de mesa Go usando Python y
 - [X] Crear una interfaz de juego. (Menú y juego). Oswaldo
 - [X] Interacción con la interfaz (Colocar ficha,...). Adrian
 - [X] Confirmar que las reglas de Go están bien implementadas. Adrian
-- [ ] Crear gráficos de botones.
+- [X] Crear gráficos de botones. Oswaldo
 - [ ] Completar la página de *Instrucciones*.
 - [ ] Compilar el juego en un ejecutable.
 - [ ] Pasar las funciones de renderizado a `clases.py` y `interfaz.py` para limpiar el código de `main.py`.

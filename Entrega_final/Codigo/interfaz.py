@@ -1,13 +1,19 @@
-
 import pygame
+import time
+import threading
+import math
 from pygame.locals import *
 from sys import exit
 import clases as go
 
 mainClock = pygame.time.Clock()
 pygame.init()
-screen = pygame.display.set_mode((100, 1000), pygame.RESIZABLE)
+screen = pygame.display.set_mode((1000, 1000))
 pygame.display.set_caption("GO")
+global segundos
+global minutos
+segundos = 0
+minutos = 0
 
 font = pygame.font.SysFont(None, 40)
 
@@ -31,6 +37,8 @@ def draw_text(text, font, color, surface, x, y):
 
 def main_menu():
     click = False
+
+    screen = pygame.display.set_mode((1000, 1000))
 
     # Creación de botones al menú
     bot_Iniciar = pygame.Rect(400, 400, 200, 100)
@@ -89,6 +97,8 @@ def main_menu():
 def game():
     running = True
     click = False
+
+    screen = pygame.display.set_mode((1000, 1000))
 
     # Creando los botones de selección de tablero
     bot_x9  = pygame.Rect(300, 400, 100, 100)
@@ -202,11 +212,33 @@ def busca_casilla(x: int, y: int, size: int, dimension: float):
     else:
         return None
 
+def crono():
+  global segundos
+  global minutos
+  segundos = int(segundos)
+  minutos = int(minutos)
+  if segundos == 59:
+    segundos = 0
+    minutos += 1
+    return crono()
+  else:
+    segundos +=1
+    time.sleep(1)
+    return crono()
+
 def partida(tablero: int):
     par = True
     offset = 124.8
+
+    # Creando un hilo que se encargue de mantener el cronómetro
+    hilo = threading.Thread(target=crono, args=())
+    hilo.start()
     
+    mesa_fondo = pygame.image.load('Entrega_final/Fondo.jpg')
     mesa_fondo = pygame.transform.scale(mesa_fondo, (1500, 1000))
+    screen = pygame.display.set_mode((1500, 1000), pygame.RESIZABLE)
+    bot_largo  = pygame.image.load('Entrega_final/Botón Largo.png')
+    bot_largo  = pygame.transform.scale(bot_largo, (500,250))
 
     file_ficha_negra  = 'Entrega_final/Ficha negra.png'
     file_ficha_blanca = 'Entrega_final/Ficha blanca.png'
@@ -248,7 +280,28 @@ def partida(tablero: int):
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)  
         screen.blit(mesa_fondo,(0,0))
         screen.blit(tab, (100,100))
+        screen.blit(bot_largo,(950 ,100))
         # dibujar_tablero(screen, tablero)
+
+        # Iniciando el cronómetro de la partida
+        
+        global segundos
+        global minutos
+        segundos = int(segundos)
+        minutos = int(minutos)
+
+        if segundos <= 9:
+          segundos = '0' + str(segundos)
+        else:
+          segundos = str(segundos)
+
+        if minutos <= 9:
+          minutos  = '0' + str(minutos)
+        else:
+          minutos  = str(minutos)
+
+        draw_text(str(minutos) + ' :', font, (255, 255, 255), screen, 1160, 125)
+        draw_text(str(segundos), font, (255, 255, 255), screen, 1215, 125)
 
         # Obteniendo las coordenadas del mouse
         mx, my = pygame.mouse.get_pos()
@@ -288,7 +341,8 @@ def partida(tablero: int):
                exit()
            if event.type == KEYDOWN:
                if event.key == K_ESCAPE:
-                   par = False 
+                   par = False
+                   game() 
            if event.type == MOUSEBUTTONDOWN:
                if event.button == 1:
                    click = True
