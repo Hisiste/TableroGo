@@ -221,45 +221,45 @@ def crono():
         segundos +=1
         time.sleep(1)
 
-def Rendirse():
-  Rendirse = True
-  click = False
+def msg_Box(text: str):
+    Rendirse = True
+    click = False
 
-  bot_Si = pygame.Rect(600, 480, 100, 100)
-  bot_No = pygame.Rect(800, 480, 100, 100)
-  while Rendirse:
-    pygame.draw.rect(screen, (255, 255, 255), bot_Si)
-    pygame.draw.rect(screen, (255, 255, 255), bot_No)
-    screen.blit(bot_grande,((500, 375)))
-    draw_text('¿Seguro que desea rendirse?', font, (255, 255, 255), screen, 555, 420)
-    screen.blit(bot_corto, ((600, 480)))
-    screen.blit(bot_corto, ((800, 480)))
-    draw_text('SI', font, (0, 0, 0), screen, 635, 525)
-    draw_text('NO', font, (0, 0, 0), screen, 835, 525)
+    bot_Si = pygame.Rect(600, 480, 100, 100)
+    bot_No = pygame.Rect(800, 480, 100, 100)
+    while Rendirse:
+        pygame.draw.rect(screen, (255, 255, 255), bot_Si)
+        pygame.draw.rect(screen, (255, 255, 255), bot_No)
+        screen.blit(bot_grande,((500, 375)))
+        draw_text(text, font, (255, 255, 255), screen, 555, 420)
+        screen.blit(bot_corto, ((600, 480)))
+        screen.blit(bot_corto, ((800, 480)))
+        draw_text('SI', font, (0, 0, 0), screen, 635, 525)
+        draw_text('NO', font, (0, 0, 0), screen, 835, 525)
 
-    # Obteniendo las coordenadas del mouse
-    mx, my = pygame.mouse.get_pos()
+        # Obteniendo las coordenadas del mouse
+        mx, my = pygame.mouse.get_pos()
 
-    if click:
-      if bot_Si.collidepoint((mx, my)) :
-        return True
-        Rendirse = False
-      if bot_No.collidepoint((mx, my)):
-        Rendirse = False
+        if click:
+            if bot_Si.collidepoint((mx, my)) :
+                return True
+            if bot_No.collidepoint((mx, my)):
+                return False
 
-    for event in pygame.event.get():
-      if event.type == QUIT:
-        pygame.quit()
-        exit()
-      if event.type == KEYDOWN:
-        if event.key == K_ESCAPE:
-          Rendirse = False
-      if event.type == MOUSEBUTTONDOWN:
-        if event.button == 1:
-          click = True
+        click = False
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    Rendirse = False
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
 
-    pygame.display.update()
-    mainClock.tick(60)
+        pygame.display.update()
+        mainClock.tick(60)
 
 def partida(tablero: int):
     par        = True
@@ -268,6 +268,10 @@ def partida(tablero: int):
     offset     = 124.8
     paso       = 0
     ultimaFich = go.np.array([])
+
+    fin_de_partida = False
+    global segundos
+    global minutos
 
     Jugadores_font = pygame.font.SysFont(None, 50)
     Jugadores_bold_font = pygame.font.SysFont(None, 50, italic = True)
@@ -281,9 +285,9 @@ def partida(tablero: int):
     file_ficha_blanca = 'Entrega_final/Ficha blanca.png'
 
     # Creación de botones
-    bot_Pasar     = pygame.Rect(1150, 400, 200, 100)
-    bot_Rendirse  = pygame.Rect(1150, 550, 200, 100)
-    bot_Empate    = pygame.Rect(1550, 700, 200, 100)
+    bot_Pasar     = pygame.Rect(1100, 400, 200, 100)
+    bot_Rendirse  = pygame.Rect(1100, 550, 200, 100)
+    bot_Empate    = pygame.Rect(1100, 700, 200, 100)
     linea_J1  = pygame.Rect(1000, 290, 160, 5)
     linea_J2  = pygame.Rect(1230, 290, 160, 5)
 
@@ -320,6 +324,27 @@ def partida(tablero: int):
     mi_tablero = go.Tablero_Go(tablero)
 
     while par:
+        # Obteniendo las coordenadas del mouse
+        mx, my = pygame.mouse.get_pos()
+        casilla = busca_casilla(mx, my, tablero, dimension, offset)
+
+        # Eventos para los botones
+        if click:
+            if bot_Pasar.collidepoint((mx, my)):
+                jugador = not jugador
+                paso +=1
+                if paso == 2:
+                    par = False
+                    fin_de_partida = True
+            if bot_Rendirse.collidepoint((mx, my)):
+                if msg_Box('¿Seguro que desea rendirse?'):
+                    par = False
+                    fin_de_partida = True
+            if bot_Empate.collidepoint((mx, my)):
+                if msg_Box('¿Quiere aceptar el empate?'):
+                    par = False
+                    fin_de_partida = True
+
         draw_text('Partida en curso', font, (255, 255, 255), screen, 390, 50)
 
         # Colocando los botones de selección de tablero
@@ -342,8 +367,6 @@ def partida(tablero: int):
 
         # Iniciando el cronómetro de la partida
         #crono()
-        global segundos
-        global minutos
         segundos = int(segundos)
         minutos = int(minutos)
 
@@ -366,32 +389,10 @@ def partida(tablero: int):
         else:
           pygame.draw.rect(screen, (0, 0, 0), linea_J2)
 
-
         draw_text('Jugador 1', Jugadores_font, (0, 0, 0), screen, 1000, 250)
         draw_text('Jugador 2', Jugadores_font, (255, 255, 255), screen, 1230, 250)
 
-        # Obteniendo las coordenadas del mouse
-        mx, my = pygame.mouse.get_pos()
-        casilla = busca_casilla(mx, my, tablero, dimension, offset)
 
-                # Eventos para los botones
-        if click:
-          if bot_Pasar.collidepoint((mx, my)):
-            jugador = not jugador
-            paso +=1
-            if paso == 2:
-              par = False
-              fin_partida((10,10))
-          if bot_Rendirse.collidepoint((mx, my)):
-            if Rendirse():
-              par = False
-              fin_partida((10,10))
-            else:
-              pass
-          if bot_Empate.collidepoint((mx, my)):
-            pass
-
-        
         # En caso de que el mouse esté sobre una casilla válida del tablero.
         if casilla is not None:
             # Veamos si la casilla es jugable. Esto es, el jugador puede poner
@@ -448,8 +449,21 @@ def partida(tablero: int):
         pygame.display.update()
         mainClock.tick(60)
 
-def fin_partida(puntaje):
-  fin = True
 
-  while fin:
-    pass  
+    if fin_de_partida:
+        par = True
+        draw_text('¡La partida ha finalizado!', crono_font, (255, 255, 255), screen, 250, 250)
+
+        while par:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        screen = pygame.display.set_mode((1000, 1000))
+                        par = False
+
+            pygame.display.update()
+            mainClock.tick(60)
+
