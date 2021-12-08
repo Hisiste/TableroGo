@@ -3,6 +3,24 @@
 Este proyecto se basa en implementar el juego de mesa Go usando Python y
 `pygame`.
 
+## Ejecutar el código
+
+Antes de poder correr el código, se necesitan instalar las siguientes librerías:
+
+- [pygame](https://www.pygame.org/).
+
+Se puede instalar con el siguiente comando:
+```
+pip install pygame
+```
+
+Para ejecutar el código, use el siguiente comando:
+```
+python ./Entrega_final/Codigo/main.py
+```
+Es **necesario** correrlo de esta manera, pues las imágenes son buscadas y
+cargadas usando una dirección en específico.
+
 ## TODO
 - [X] Crear la programación de las clases
 - [X] Tener los 3 tableros en gráfico. Oswaldo
